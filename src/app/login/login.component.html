@@ -1,0 +1,11 @@
+<div class="login">
+  <div class="login-panel">
+    <p class="login-title">
+      BattleShip
+    </p>
+    <form #loginForm="ngForm">
+      <input class="login-field" type="text" placeholder="Enter your nickname *" required [(ngModel)]="username" name="username" id="username">
+      <button class="login-btn" type="button" [disabled]="!loginForm.form.valid" (click)="this.createUser()">PLAY!</button>
+    </form>
+  </div>
+</div>

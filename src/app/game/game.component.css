@@ -1,0 +1,55 @@
+.game * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.game-col {
+  float: left;
+  width: 50%;
+  min-width: 400px;
+  min-height: 400px;
+}
+
+.game:after {
+  content: '';
+  display: table;
+  width: 100%;
+  clear: both;
+}
+
+.game-field-letters,
+.game-field-numbers {
+  width: 30px;
+  height: 330px;
+  padding-top: 30px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  word-spacing: 0;
+  letter-spacing: 0;
+}
+
+.game-field-letters {
+  width: 330px;
+  height: 30px;
+  padding-top: 0;
+  padding-left: 30px;
+}
+
+.game-field-letters span,
+.game-field-numbers span {
+  float: left;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.game-field {
+  position: relative;
+}

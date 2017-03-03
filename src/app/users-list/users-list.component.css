@@ -1,0 +1,32 @@
+.users {
+  padding: 50px 0;
+}
+
+.users-pnael {
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.users-item {
+  background: #c7e5dd;
+  border-bottom: 1px solid #9ccbe5;
+  cursor: pointer;
+}
+
+.users-item:hover {
+  opacity: 0.8;
+}
+
+.users-title {
+  margin: 0 0 25px;
+  font-size: 20px;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: 600;
+}
+
+.users-name {
+  display: block;
+  padding: 10px;
+}

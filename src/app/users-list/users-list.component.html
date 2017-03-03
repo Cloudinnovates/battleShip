@@ -1,0 +1,14 @@
+<div class="users">
+  <div class="users-pnael">
+    <p class="users-title">Choose opponent</p>
+    <div class="users-item" *ngFor="let user of users" (click)="this.chooseOpponent(user._id)" [hidden]="userId == user._id">
+      <span class="users-name">
+        {{user.username}}<br>
+        {{user._id}}
+      </span>
+    </div>
+  </div>
+</div>
+
+<change-name></change-name>
+<notification *ngIf="notificationShow" [notificationdata]="notificationData" (answerready)="playRequestAnswer(answer)"></notification>

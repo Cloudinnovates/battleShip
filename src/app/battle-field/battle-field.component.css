@@ -1,0 +1,32 @@
+.game-field-letters,
+.game-field-numbers {
+  width: 30px;
+  height: 330px;
+  padding-top: 30px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  word-spacing: 0;
+  letter-spacing: 0;
+}
+
+.game-field-letters {
+  width: 330px;
+  height: 30px;
+  padding-top: 0;
+  padding-left: 30px;
+}
+
+.game-field-letters span,
+.game-field-numbers span {
+  float: left;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.game-field {
+  position: relative;
+}

@@ -1,0 +1,178 @@
+.game * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.game-col {
+  float: left;
+  width: 50%;
+  min-width: 400px;
+  min-height: 400px;
+}
+
+.game:after {
+  content: '';
+  display: table;
+  width: 100%;
+  clear: both;
+}
+
+.select-ship {
+  position: relative;
+  margin: 30px 0 0 30px;
+}
+
+.ship-rotate-btn {
+  background: url("../../images/rotate-btn.png") no-repeat;
+  background-size: contain;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  outline: none;
+}
+
+.select-ship .ship {
+  position: absolute;
+  background: #fff;
+  z-index: 5;
+  height: auto;
+  width: 30px;
+}
+
+.select-ship .ship.horizontal {
+  height: 30px;
+  width: auto;
+}
+
+.select-ship .ship:nth-child(1) {
+  left: 0;
+  top: 130px;
+}
+
+.select-ship .ship:nth-child(2) {
+  left: 150px;
+  top: 130px;
+}
+
+.select-ship .ship:nth-child(3) {
+  left: 270px;
+  top: 130px;
+}
+
+.select-ship .ship:nth-child(4) {
+  left: 0;
+  top: 50px;
+}
+
+.select-ship .ship:nth-child(5) {
+  left: 90px;
+  top: 50px;
+}
+
+.select-ship .ship:nth-child(6) {
+  left: 180px;
+  top: 50px;
+}
+
+.select-ship .ship:nth-child(9),
+.select-ship .ship:nth-child(10),
+.select-ship .ship:nth-child(8),
+.select-ship .ship:nth-child(7) {
+  left: 0;
+  top: 0;
+}
+
+.select-ship .ship:nth-child(8) {
+  left: 50px;
+}
+
+.select-ship .ship:nth-child(9) {
+  left: 100px;
+}
+
+.select-ship .ship:nth-child(10) {
+  left: 150px;
+}
+
+.ship {
+  display: inline-block;
+  line-height: 0;
+  box-shadow: 0 0 3px 0 #6f00ff;
+  cursor: pointer;
+}
+
+.ship:after {
+  content: '';
+  display: table;
+  width: 100%;
+  clear: both;
+}
+
+.ship span {
+  display: block;
+  float: left;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #6f00ff;
+}
+
+.ship.four {
+  width: 30px;
+}
+
+.ship.vertical {
+  width: 30px;
+}
+
+.game-field-letters,
+.game-field-numbers {
+  width: 30px;
+  height: 330px;
+  padding-top: 30px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  word-spacing: 0;
+  letter-spacing: 0;
+}
+
+.game-field-letters {
+  width: 330px;
+  height: 30px;
+  padding-top: 0;
+  padding-left: 30px;
+}
+
+.game-field-letters span,
+.game-field-numbers span {
+  float: left;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 30px;
+}
+
+.game-field {
+  position: relative;
+}
+
+.ready-button-wrap {
+  min-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ready-button {
+  font-size: 20px;
+  padding: 10px;
+}
