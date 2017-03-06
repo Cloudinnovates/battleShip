@@ -1,6 +1,8 @@
 <div class="game">
   <div class="game-col">
-    <div class="ready-button-wrap" *ngIf="fleet.fleetIsReady"><button (click)="submitGame()" class="ready-button">READY!</button></div>
+    <div class="ready-button-wrap">
+         <!--*ngIf="fleet.fleetIsReady"-->
+    <button (click)="submitGame()" class="ready-button">READY!</button></div>
     <div class="select-ship">
       <div class="ship"
            *ngFor="let ship of fleet.ships"

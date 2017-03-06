@@ -11,15 +11,11 @@ export class UserNotificationComponent {
   @Input()
   notificationdata: Object = {};
   @Output()
-  answerready = new EventEmitter<boolean>();
+  answerready = new EventEmitter<{}>();
 
   constructor() {}
 
-  acceptRequest() {
-    this.answerready.emit(true);
-  }
-
-  rejectRequest() {
-    this.answerready.emit(false);
+  createAnswer(answer: boolean) {
+    this.answerready.emit({answer: answer, users : this.notificationdata});
   }
 }

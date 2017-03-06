@@ -21,12 +21,12 @@ export class UsersListComponent {
   private notificationData: Object = {};
 
   constructor(private router: Router, private apiService: APIService) {
-    this.apiService.getUsersList().then((res) => {
-      this.users = JSON.parse(res['_body']);
-    });
   }
 
   ngOnInit() {
+    this.apiService.getUsersList().then((res) => {
+      this.users = JSON.parse(res['_body']);
+    });
     this.socket = io.connect(this.url);
     this.socket.on('connect', () => {
       this.saveUsersSession();
@@ -35,28 +35,71 @@ export class UsersListComponent {
       this.notificationData = data;
       this.notificationShow = true;
     });
+    this.socket.on('playRequestRejected', (data: string) => {
+      alert('Play request was rejected!');
+    });
+    this.socket.on('playRequestAccepted', (data: {}) => {
+      this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
+        localStorage.setItem('gameId', data['newGame']._body);
+        this.router.navigate(['game-prepare']);
+      });
+    });
   }
 
-  saveUsersSession(): void {
+  private saveUsersSession(): void {
     this.apiService.saveUserSession({id: this.userId, sessionId: this.socket.id});
   }
 
-  getUserSession(id: string, callback: Function):void {
+  private getUserSession(id: string, callback: Function): void {
     this.apiService.getUserSession(id).then((res) => {
       callback(res);
     });
   }
 
-  chooseOpponent(id: string): void {
-    this.getUserSession(id, (res:any) => {
-      this.socket.emit('askToPlay', {id : res._body, senderId: this.userId, senderName: this.userName}, (data: any) => {
-        console.log('client on chooseOpponent');
-        console.log(data);
+  private chooseOpponent(id: string): void {
+    this.getUserSession(id, (res: any) => {
+      this.socket.emit('askToPlay', {id: res._body, senderId: this.userId, senderName: this.userName}, (data: any) => {
       });
     });
   }
 
-  playRequestAnswer(answer: boolean): void {
-    console.log('answer ' + answer);
+  private playRequestAnswer(data: {}): void {
+    if (data['answer']) {
+      this.setPositiveAnswer(data['users'].senderId, this.userName);
+    } else {
+      this.setNegativeAnswer(data['users'].senderId, this.userName);
+    }
+    this.notificationShow = false;
+  }
+
+  private setPositiveAnswer(id: string, userName: string) {
+    this.apiService.getUserStatus(id).then((res) => {
+      if (res['_body'] == 'free') {
+        this.apiService.setUserStatus(this.userId, 'playing').then((res) => {});
+        this.getUserSession(id, (res: string) => {
+          this.createNewGame(id, this.userId, (newGame: {}) => {
+            localStorage.setItem('gameId', newGame['_body']);
+            this.router.navigate(['game-prepare']);
+            this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGame: newGame});
+          });
+        })
+      } else {
+        alert('The user is playing already!');
+        this.apiService.setUserStatus(this.userId, 'free').then((res) => {});
+      }
+    });
+  }
+
+  private createNewGame(id1: string, id2: string, callback: Function) {
+    this.apiService.createNewGame(id1, id2).then((newGame) => {
+      callback(newGame);
+    });
+  };
+
+  private setNegativeAnswer(id: string, userName: string) {
+    this.getUserSession(id, (res: string) => {
+      this.socket.emit('negativeAnswer', {id: res['_body'], userName: userName}, (data: any) => {
+      });
+    })
   }
 }

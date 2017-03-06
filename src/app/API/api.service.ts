@@ -3,6 +3,7 @@ import {Http, Headers} from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 
 import {Fleet} from '../fleet/fleet';
+import {ShipCell} from '../ship/shipCell';
 import {User} from  '../user';
 
 @Injectable()
@@ -44,7 +45,7 @@ export class APIService {
       .catch(this.handleError);
   }
 
-  saveUserSession(data: {}):Promise<string> {
+  saveUserSession(data: {}): Promise<string> {
     return this.http
       .post(this.APIUrl + 'session', data, {headers: this.headers})
       .toPromise()
@@ -54,7 +55,7 @@ export class APIService {
       .catch(this.handleError);
   }
 
-  getUserSession(userId: string):Promise<string> {
+  getUserSession(userId: string): Promise<string> {
     return this.http
       .get(this.APIUrl + 'session/?userId=' + userId, {headers: this.headers})
       .toPromise()
@@ -64,10 +65,50 @@ export class APIService {
       .catch(this.handleError);
   }
 
-  setFleet(obj: Fleet) {
-    this.fleet = obj;
-    console.log(this.fleet);
+  setUserStatus(userId: string, status: string): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'users/set-status', {id: userId, status: status}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
   }
+
+  getUserStatus(userId: string): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'users/get-status', {id: userId}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
+  }
+
+  createNewGame(player1Id: string, player2Id: string): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'game', {player1Id: player1Id, player2Id: player2Id}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
+  }
+
+  setFleet(gameId: string, userId: string, fleet: ShipCell[]) {
+    return this.http
+      .post(this.APIUrl + 'game/set-fleet', {gameId: gameId, userId: userId, fleet: fleet}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
+  }
+
+  // setFleet(obj: Fleet) {
+  //   this.fleet = obj;
+  //   console.log(this.fleet);
+  // }
 
   getFleet() {
     console.log(this.fleet);

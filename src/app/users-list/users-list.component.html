@@ -11,4 +11,4 @@
 </div>
 
 <change-name></change-name>
-<notification *ngIf="notificationShow" [notificationdata]="notificationData" (answerready)="playRequestAnswer(answer)"></notification>
+<notification *ngIf="notificationShow" [notificationdata]="notificationData" (answerready)="playRequestAnswer($event)"></notification>

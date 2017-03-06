@@ -5,6 +5,7 @@ import {Router} from '@angular/router';
 
 import {Fleet} from '../fleet/fleet';
 import {Ship} from '../ship/ship';
+import {ShipCell} from '../ship/shipCell';
 
 @Component({
   moduleId: module.id,
@@ -19,10 +20,14 @@ export class GamePrepareComponent {
   private battleHeight: number = 300;
   private step: number = 30;
   private overField: boolean;
+  private userId: string = localStorage.getItem('id');
+  private gameId: string = localStorage.getItem('gameId');
   private shipType: {width: number, height: number} = {width: null, height: null};
   fleet: Fleet;
 
-  constructor(private APIService: APIService, private router : Router) {
+  constructor(private apiService: APIService, private router : Router) {}
+
+  ngOnInit(): void {
     this.fleet = new Fleet([
       new Ship(1, 4),
       new Ship(2, 3),
@@ -35,9 +40,6 @@ export class GamePrepareComponent {
       new Ship(9, 1, true, false),
       new Ship(10, 1, true, false),
     ]);
-  }
-
-  ngOnInit(): void {
     this.createBattleField('userGamePanel');
     this.setBattleFieldCoords();
   }
@@ -167,11 +169,16 @@ export class GamePrepareComponent {
     return {top: Math.round(top), left: Math.round(left)};
   }
 
-  private submitGame() {
+  private submitGame(): void {
     if (this.fleet.fleetIsReady) {
-      this.APIService.setFleet(this.fleet);
-      this.router.navigate(['game']);
+      let shipsCoords: ShipCell[] = [];
+
+      this.fleet.ships.forEach(function(item) {
+        shipsCoords = shipsCoords.concat(item.cells);
+      });
+      this.apiService.setFleet(this.gameId, this.userId, shipsCoords).then((res) => {
+
+      });
     }
   }
-
 }
