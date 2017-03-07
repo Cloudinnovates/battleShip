@@ -90,12 +90,13 @@ export class APIService {
       .post(this.APIUrl + 'game', {player1Id: player1Id, player2Id: player2Id}, {headers: this.headers})
       .toPromise()
       .then((res) => {
-        return res;
+        let userId = JSON.parse(res['_body'])['_id'];
+        return userId;
       })
       .catch(this.handleError);
   }
 
-  setFleet(gameId: string, userId: string, fleet: ShipCell[]) {
+  setFleet(gameId: string, userId: string, fleet: ShipCell[]): Promise<string> {
     return this.http
       .post(this.APIUrl + 'game/set-fleet', {gameId: gameId, userId: userId, fleet: fleet}, {headers: this.headers})
       .toPromise()
@@ -105,19 +106,28 @@ export class APIService {
       .catch(this.handleError);
   }
 
-  // setFleet(obj: Fleet) {
-  //   this.fleet = obj;
-  //   console.log(this.fleet);
-  // }
+  getFleet(gameId: string, userId: string): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'game/get-fleet', {gameId: gameId, userId: userId}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
+  }
 
-  getFleet() {
-    console.log(this.fleet);
-    return this.fleet;
+  shoot(gameId: string, userId: string, coords: {x: number, y: number}): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'game/shoot', {gameId, userId, coords}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
   }
 
   private handleError(error: any): Promise<any> {
     console.error('An error occurred', error);
     return Promise.reject(error.message || error);
   }
-
 }

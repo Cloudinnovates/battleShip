@@ -1,5 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 
+import {APIService} from '../API/api.service';
+import {Router} from '@angular/router';
+
 @Component({
   moduleId: module.id,
   selector: 'game',
@@ -8,13 +11,22 @@ import {Component, OnInit} from '@angular/core';
 })
 
 export class GameComponent {
+  private userId: string = localStorage.getItem('id');
+  private gameId: string = localStorage.getItem('gameId');
+  private shipsCoords: Array<{x: number, y: number}>;
 
-  constructor() {
+  constructor(private apiService: APIService, private router : Router) {
 
   }
 
   ngOnInit(): void {
+    this.getFleet();
+  }
 
+  getFleet() {
+    this.apiService.getFleet(this.gameId, this.userId).then((res) => {
+      this.shipsCoords = JSON.parse(res['_body']).shipsCellsCoords;
+    })
   }
 
 }

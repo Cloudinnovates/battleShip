@@ -38,9 +38,11 @@ export class UsersListComponent {
     this.socket.on('playRequestRejected', (data: string) => {
       alert('Play request was rejected!');
     });
-    this.socket.on('playRequestAccepted', (data: {}) => {
+    this.socket.on('playRequestAccepted', (newGameId: string) => {
+      console.log(newGameId);
+
       this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
-        localStorage.setItem('gameId', data['newGame']._body);
+        localStorage.setItem('gameId', newGameId);
         this.router.navigate(['game-prepare']);
       });
     });
@@ -77,10 +79,10 @@ export class UsersListComponent {
       if (res['_body'] == 'free') {
         this.apiService.setUserStatus(this.userId, 'playing').then((res) => {});
         this.getUserSession(id, (res: string) => {
-          this.createNewGame(id, this.userId, (newGame: {}) => {
-            localStorage.setItem('gameId', newGame['_body']);
+          this.createNewGame(id, this.userId, (newGameId: string) => {
+            localStorage.setItem('gameId', newGameId);
             this.router.navigate(['game-prepare']);
-            this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGame: newGame});
+            this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGameId: newGameId});
           });
         })
       } else {

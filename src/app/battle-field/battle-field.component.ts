@@ -1,6 +1,4 @@
-import {Component, ElementRef, Renderer} from "@angular/core";
-
-import {Fleet} from '../fleet/fleet';
+import {Component, ElementRef, Renderer, Input, Output, EventEmitter, OnChanges, SimpleChanges} from "@angular/core";
 
 import {APIService} from '../API/api.service';
 
@@ -11,12 +9,19 @@ import {APIService} from '../API/api.service';
   styleUrls: ['./battle-field.component.css']
 })
 
-export class BattleField {
+export class BattleField  implements OnChanges{
   private battleCoords: {top: number, left: number};
   private componentElement: ElementRef;
   private renderer: Renderer;
   private battleField: any;
+  private userId: string = localStorage.getItem('id');
+  private gameId: string = localStorage.getItem('gameId');
 
+  @Input()
+  coordsdata: Array<{x: number, y: number}>;
+
+  @Input()
+  fieldtype: string;
 
   constructor(componentElement: ElementRef, renderer: Renderer, private apiService: APIService) {
     this.componentElement = componentElement;
@@ -29,14 +34,25 @@ export class BattleField {
     this.renderer.listen(this.battleField, 'click', (event: MouseEvent)=> {
       this.fireCoords(event);
     });
-    let fleet:Fleet = this.apiService.getFleet();
-    this.drawShips(fleet);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if(this.coordsdata) {
+      let newCoords = changes['coordsdata'].currentValue;
+      if(newCoords && newCoords.length > 0) {
+        this.drawShips(newCoords);
+      }
+    }
   }
 
   private fireCoords(event: MouseEvent) {
-    console.log(this.battleCoords);
-    console.log(Math.floor((event.pageX - this.battleCoords.left)/30));
-    console.log(Math.floor((event.pageY - this.battleCoords.top)/30));
+    if(this.fieldtype == 'user') {
+      let pageX = Math.floor((event.pageX - this.battleCoords.left)/30);
+      let pageY = Math.floor((event.pageY - this.battleCoords.top)/30);
+      this.apiService.shoot(this.gameId, this.userId, {x : pageX, y: pageY}).then((res) => {
+        console.log(res);
+      })
+    }
   }
 
   private createBattleField() {
@@ -44,7 +60,7 @@ export class BattleField {
       let ctx = this.battleField.getContext('2d');
       this.battleField.width = 330;
       this.battleField.height = 330;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = .3;
       ctx.strokeStyle = "#6f00ff";
 
       for (let i = 1; i <= 11; i++) {
@@ -60,18 +76,21 @@ export class BattleField {
       this.componentElement.nativeElement.appendChild(this.battleField);
   }
 
-  private drawShips(data: Fleet) {
-    // let ctx = this.battleField.getContext('2d');
-    // ctx.lineWidth = 1;
-    // ctx.strokeStyle = "#ff2a37";
-    //
-    // for (let i = 0; i < data.ships.length; i++) {
-    //   for (let j = 0; j < data.ships[i].cells.length; j++) {
-    //     let startX: number = (data.ships[i].cells[j].x * 30) + 30;
-    //     let startY: number = (data.ships[i].cells[j].y * 30) + 30;
-    //     ctx.fillRect(startX,startY,30,30);
-    //   }
-    // }
+  private drawShips(coords: Array<{x: number, y: number}>) {
+    let ctx = this.battleField.getContext('2d');
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#6f00ff";
+    coords.forEach(function (item, key) {
+      let startX: number = 30 + (item.x * 30);
+      let startY: number = 30 + (item.y * 30);
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(startX+30, startY);
+      ctx.lineTo(startX+30, startY+30);
+      ctx.lineTo(startX, startY+30);
+      ctx.lineTo(startX, startY);
+      ctx.stroke();
+    });
   }
 
   private setBattleFieldCoords(): void {
