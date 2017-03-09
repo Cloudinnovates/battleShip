@@ -39,8 +39,6 @@ export class UsersListComponent {
       alert('Play request was rejected!');
     });
     this.socket.on('playRequestAccepted', (newGameId: string) => {
-      console.log(newGameId);
-
       this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
         localStorage.setItem('gameId', newGameId);
         this.router.navigate(['game-prepare']);

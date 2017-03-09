@@ -15,9 +15,7 @@ export class GameComponent {
   private gameId: string = localStorage.getItem('gameId');
   private shipsCoords: Array<{x: number, y: number}>;
 
-  constructor(private apiService: APIService, private router : Router) {
-
-  }
+  constructor(private apiService: APIService, private router : Router) {}
 
   ngOnInit(): void {
     this.getFleet();

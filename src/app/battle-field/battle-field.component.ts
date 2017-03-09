@@ -2,14 +2,14 @@ import {Component, ElementRef, Renderer, Input, Output, EventEmitter, OnChanges,
 
 import {APIService} from '../API/api.service';
 
-@Component ({
+@Component({
   moduleId: module.id,
   selector: 'battle-field',
   templateUrl: 'battle-field.component.html',
   styleUrls: ['./battle-field.component.css']
 })
 
-export class BattleField  implements OnChanges{
+export class BattleField implements OnChanges {
   private battleCoords: {top: number, left: number};
   private componentElement: ElementRef;
   private renderer: Renderer;
@@ -31,49 +31,87 @@ export class BattleField  implements OnChanges{
   ngOnInit() {
     this.createBattleField();
     this.setBattleFieldCoords();
-    this.renderer.listen(this.battleField, 'click', (event: MouseEvent)=> {
+    this.renderer.listen(this.battleField, 'click', (event: MouseEvent) => {
       this.fireCoords(event);
     });
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(this.coordsdata) {
+    if (this.coordsdata) {
       let newCoords = changes['coordsdata'].currentValue;
-      if(newCoords && newCoords.length > 0) {
+      if (newCoords && newCoords.length > 0) {
         this.drawShips(newCoords);
       }
     }
   }
 
   private fireCoords(event: MouseEvent) {
-    if(this.fieldtype == 'user') {
-      let pageX = Math.floor((event.pageX - this.battleCoords.left)/30);
-      let pageY = Math.floor((event.pageY - this.battleCoords.top)/30);
-      this.apiService.shoot(this.gameId, this.userId, {x : pageX, y: pageY}).then((res) => {
-        console.log(res);
+    if (this.fieldtype == 'user') {
+      let pageX = Math.floor((event.pageX - this.battleCoords.left) / 30);
+      let pageY = Math.floor((event.pageY - this.battleCoords.top) / 30);
+      this.apiService.shoot(this.gameId, this.userId, {x: pageX, y: pageY}).then((res) => {
+        let response = JSON.parse(res['_body']);
+        if (response['result'] != 'wait') {
+          this.drawShoots(response);
+        } else {
+          alert(response['message']);
+        }
       })
     }
   }
 
-  private createBattleField() {
-      this.battleField = document.createElement('canvas');
-      let ctx = this.battleField.getContext('2d');
-      this.battleField.width = 330;
-      this.battleField.height = 330;
-      ctx.lineWidth = .3;
-      ctx.strokeStyle = "#6f00ff";
+  private drawShoots(res: {}) {
+    let coords = res['message'];
+    console.log(res['result']);
+    if (res['result'] == 'pass') {
+      this.drawPass(coords);
+    } else {
+      this.drawHit(coords);
+    }
+  }
 
-      for (let i = 1; i <= 11; i++) {
-        ctx.beginPath();
-        ctx.moveTo(30 * i, 30);
-        ctx.lineTo(30 * i, 330);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(30, 30 * i);
-        ctx.lineTo(330, 30 * i);
-        ctx.stroke();
-      }
-      this.componentElement.nativeElement.appendChild(this.battleField);
+  drawPass(coords: {x: number, y: number}): void {
+    let ctx = this.battleField.getContext('2d');
+    let startX: number = 43 + (coords.x * 30);
+    let startY: number = 43 + (coords.y * 30);
+    ctx.fillRect(startX, startY, 6, 6);
+  }
+
+  drawHit(coords: {x: number, y: number}): void {
+    let ctx = this.battleField.getContext('2d');
+    ctx.lineWidth = .7;
+    ctx.strokeStyle = "#ef2b2b";
+    let startX: number = 30 + (coords.x * 30);
+    let startY: number = 30 + (coords.y * 30);
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + 30, startY + 30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(startX + 30, startY);
+    ctx.lineTo(startX, startY + 30);
+    ctx.stroke();
+  }
+
+  private createBattleField() {
+    this.battleField = document.createElement('canvas');
+    let ctx = this.battleField.getContext('2d');
+    this.battleField.width = 330;
+    this.battleField.height = 330;
+    ctx.lineWidth = .3;
+    ctx.strokeStyle = "#6f00ff";
+
+    for (let i = 1; i <= 11; i++) {
+      ctx.beginPath();
+      ctx.moveTo(30 * i, 30);
+      ctx.lineTo(30 * i, 330);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(30, 30 * i);
+      ctx.lineTo(330, 30 * i);
+      ctx.stroke();
+    }
+    this.componentElement.nativeElement.appendChild(this.battleField);
   }
 
   private drawShips(coords: Array<{x: number, y: number}>) {
@@ -85,9 +123,9 @@ export class BattleField  implements OnChanges{
       let startY: number = 30 + (item.y * 30);
       ctx.beginPath();
       ctx.moveTo(startX, startY);
-      ctx.lineTo(startX+30, startY);
-      ctx.lineTo(startX+30, startY+30);
-      ctx.lineTo(startX, startY+30);
+      ctx.lineTo(startX + 30, startY);
+      ctx.lineTo(startX + 30, startY + 30);
+      ctx.lineTo(startX, startY + 30);
       ctx.lineTo(startX, startY);
       ctx.stroke();
     });
@@ -103,16 +141,12 @@ export class BattleField  implements OnChanges{
     let box = elem.getBoundingClientRect();
     let body = document.body;
     let docEl = document.documentElement;
-
     let scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
     let scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
-
     let clientTop = docEl.clientTop || body.clientTop || 0;
     let clientLeft = docEl.clientLeft || body.clientLeft || 0;
-
     let top = box.top + scrollTop - clientTop;
     let left = box.left + scrollLeft - clientLeft;
-
     return {top: Math.round(top), left: Math.round(left)};
   }
 }

@@ -46,7 +46,6 @@ export class GamePrepareComponent {
 
   private addDragEvent(event: MouseEvent, shipObject: Ship): void {
     this.resetDragParams(shipObject);
-
     let ship: HTMLElement = event.toElement.parentElement;
     let coords = this.getCoords(ship);
     let deltaX: number = event.pageX - coords.left;
@@ -132,7 +131,6 @@ export class GamePrepareComponent {
     canvas.height = 330;
     ctx.lineWidth = 0.4;
     ctx.strokeStyle = "#6f00ff";
-
     for (let i = 1; i <= 11; i++) {
       ctx.beginPath();
       ctx.moveTo(30 * i, 30);
@@ -156,23 +154,18 @@ export class GamePrepareComponent {
     let box = elem.getBoundingClientRect();
     let body = document.body;
     let docEl = document.documentElement;
-
     let scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop;
     let scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft;
-
     let clientTop = docEl.clientTop || body.clientTop || 0;
     let clientLeft = docEl.clientLeft || body.clientLeft || 0;
-
     let top = box.top + scrollTop - clientTop;
     let left = box.left + scrollLeft - clientLeft;
-
     return {top: Math.round(top), left: Math.round(left)};
   }
 
   private submitGame(): void {
     if (this.fleet.fleetIsReady) {
       let shipsCoords: ShipCell[] = [];
-
       this.fleet.ships.forEach(function(item) {
         shipsCoords = shipsCoords.concat(item.cells);
       });
