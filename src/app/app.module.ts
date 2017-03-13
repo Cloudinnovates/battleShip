@@ -2,6 +2,8 @@ import {NgModule}      from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule}   from '@angular/forms';
 import {HttpModule}    from '@angular/http';
+import { ToastrModule } from 'ngx-toastr';
+import { CommonModule } from '@angular/common';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent}     from './app.component';
@@ -20,7 +22,9 @@ import {UserNotificationComponent}  from './user-notification/userNotification.c
     BrowserModule,
     FormsModule,
     HttpModule,
-    AppRoutingModule
+    AppRoutingModule,
+    CommonModule,
+    ToastrModule.forRoot()
   ],
   declarations: [
     AppComponent,

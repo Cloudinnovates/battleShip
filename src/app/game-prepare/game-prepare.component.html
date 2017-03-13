@@ -1,19 +1,5 @@
 <div class="game">
   <div class="game-col">
-    <div class="ready-button-wrap">
-         <!--*ngIf="fleet.fleetIsReady"-->
-    <button (click)="submitGame()" class="ready-button">READY!</button></div>
-    <div class="select-ship">
-      <div class="ship"
-           *ngFor="let ship of fleet.ships"
-           [ngClass]="{'horizontal': ship.isHorizontal}"
-           (mousedown)="addDragEvent($event, ship)" >
-        <button type="button" class="ship-rotate-btn" (click)="rotateShip(ship)" *ngIf="ship.canRotate"></button>
-        <span *ngFor="let cell of ship.cells"></span>
-      </div>
-    </div>
-  </div>
-  <div class="game-col">
     <div class="game-field">
       <div id="userGamePanel"></div>
       <div class="game-field-numbers">
@@ -39,6 +25,20 @@
         <span>H</span>
         <span>I</span>
         <span>J</span>
+      </div>
+    </div>
+  </div>
+  <div class="game-col">
+    <div class="ready-button-wrap" *ngIf="fleet.fleetIsReady">
+      <button (click)="submitGame()" class="ready-button">READY!</button>
+    </div>
+    <div class="select-ship">
+      <div class="ship"
+           *ngFor="let ship of fleet.ships"
+           [ngClass]="{'horizontal': ship.isHorizontal}"
+           (mousedown)="addDragEvent($event, ship)">
+        <button type="button" class="ship-rotate-btn" (click)="rotateShip(ship)" *ngIf="ship.canRotate"></button>
+        <span *ngFor="let cell of ship.cells"></span>
       </div>
     </div>
   </div>

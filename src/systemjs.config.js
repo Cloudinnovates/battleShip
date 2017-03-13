@@ -23,6 +23,7 @@
       '@angular/router': 'npm:@angular/router/bundles/router.umd.js',
       '@angular/forms': 'npm:@angular/forms/bundles/forms.umd.js',
       'socket.io-client': 'npm:socket.io-client/dist/socket.io.js',
+      'ngx-toastr': 'node_modules/ngx-toastr/toastr.umd.js',
 
       // other libraries
       'rxjs':                      'npm:rxjs',

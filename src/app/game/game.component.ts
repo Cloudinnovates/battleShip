@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
 
 import {APIService} from '../API/api.service';
 import {Router} from '@angular/router';
@@ -15,7 +16,7 @@ export class GameComponent {
   private gameId: string = localStorage.getItem('gameId');
   private shipsCoords: Array<{x: number, y: number}>;
 
-  constructor(private apiService: APIService, private router : Router) {}
+  constructor(private apiService: APIService, private router : Router, private toastrService: ToastrService) {}
 
   ngOnInit(): void {
     this.getFleet();

@@ -126,6 +126,16 @@ export class APIService {
       .catch(this.handleError);
   }
 
+  getBattleProgress(gameId: string, userId: string): Promise<string> {
+    return this.http
+      .post(this.APIUrl + 'game/get-data', {gameId, userId}, {headers: this.headers})
+      .toPromise()
+      .then((res) => {
+        return res;
+      })
+      .catch(this.handleError);
+  }
+
   private handleError(error: any): Promise<any> {
     console.error('An error occurred', error);
     return Promise.reject(error.message || error);

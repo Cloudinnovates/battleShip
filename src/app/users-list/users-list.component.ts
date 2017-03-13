@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import * as io from "socket.io-client";
+import {ToastrService} from 'ngx-toastr';
 import {APIService} from '../API/api.service';
 import {User}        from '../user';
 
@@ -20,7 +21,7 @@ export class UsersListComponent {
   private notificationShow: boolean = false;
   private notificationData: Object = {};
 
-  constructor(private router: Router, private apiService: APIService) {
+  constructor(private router: Router, private apiService: APIService, private toastrService: ToastrService) {
   }
 
   ngOnInit() {
@@ -36,11 +37,12 @@ export class UsersListComponent {
       this.notificationShow = true;
     });
     this.socket.on('playRequestRejected', (data: string) => {
-      alert('Play request was rejected!');
+      this.toastrService.info(`${data} rejected your request!`);
     });
-    this.socket.on('playRequestAccepted', (newGameId: string) => {
+    this.socket.on('playRequestAccepted', (data: {}) => {
       this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
-        localStorage.setItem('gameId', newGameId);
+        localStorage.setItem('gameId', data['newGameId']);
+        localStorage.setItem('opponentId', data['opponentId']);
         this.router.navigate(['game-prepare']);
       });
     });
@@ -58,14 +60,14 @@ export class UsersListComponent {
 
   private chooseOpponent(id: string): void {
     this.getUserSession(id, (res: any) => {
-      this.socket.emit('askToPlay', {id: res._body, senderId: this.userId, senderName: this.userName}, (data: any) => {
-      });
+      this.socket.emit('askToPlay', {id: res._body, senderId: this.userId, senderName: this.userName}, (data: any) => {});
     });
   }
 
   private playRequestAnswer(data: {}): void {
     if (data['answer']) {
       this.setPositiveAnswer(data['users'].senderId, this.userName);
+      localStorage.setItem('opponentId', data['users'].senderId);
     } else {
       this.setNegativeAnswer(data['users'].senderId, this.userName);
     }
@@ -75,17 +77,19 @@ export class UsersListComponent {
   private setPositiveAnswer(id: string, userName: string) {
     this.apiService.getUserStatus(id).then((res) => {
       if (res['_body'] == 'free') {
-        this.apiService.setUserStatus(this.userId, 'playing').then((res) => {});
+        this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
+        });
         this.getUserSession(id, (res: string) => {
           this.createNewGame(id, this.userId, (newGameId: string) => {
             localStorage.setItem('gameId', newGameId);
             this.router.navigate(['game-prepare']);
-            this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGameId: newGameId});
+            this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGameId: newGameId, userId : localStorage.getItem('id')});
           });
         })
       } else {
-        alert('The user is playing already!');
-        this.apiService.setUserStatus(this.userId, 'free').then((res) => {});
+        this.toastrService.info('The user is playing already!');
+        this.apiService.setUserStatus(this.userId, 'free').then((res) => {
+        });
       }
     });
   }

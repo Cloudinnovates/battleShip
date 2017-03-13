@@ -1,4 +1,6 @@
 import {Component, ElementRef, Renderer, Input, Output, EventEmitter, OnChanges, SimpleChanges} from "@angular/core";
+import {ToastrService} from 'ngx-toastr';
+import * as io from "socket.io-client";
 
 import {APIService} from '../API/api.service';
 
@@ -16,6 +18,8 @@ export class BattleField implements OnChanges {
   private battleField: any;
   private userId: string = localStorage.getItem('id');
   private gameId: string = localStorage.getItem('gameId');
+  private url: string = 'http://localhost:3000';
+  private socket: any = null;
 
   @Input()
   coordsdata: Array<{x: number, y: number}>;
@@ -23,7 +27,7 @@ export class BattleField implements OnChanges {
   @Input()
   fieldtype: string;
 
-  constructor(componentElement: ElementRef, renderer: Renderer, private apiService: APIService) {
+  constructor(componentElement: ElementRef, renderer: Renderer, private apiService: APIService, private toastrService: ToastrService) {
     this.componentElement = componentElement;
     this.renderer = renderer;
   }
@@ -33,6 +37,14 @@ export class BattleField implements OnChanges {
     this.setBattleFieldCoords();
     this.renderer.listen(this.battleField, 'click', (event: MouseEvent) => {
       this.fireCoords(event);
+    });
+    if (this.fieldtype == 'user') {
+      this.battleProgressLoad();
+    }
+
+    this.socket = io.connect(this.url);
+    this.socket.on('gameLose', () => {
+      console.log('gameLose');
     });
   }
 
@@ -45,24 +57,45 @@ export class BattleField implements OnChanges {
     }
   }
 
+  private battleProgressLoad() {
+    this.apiService.getBattleProgress(this.gameId, this.userId).then((res: any) => {
+      let data = JSON.parse(res['_body']).user;
+      data.pureShots.forEach((item: {x: number, y: number}, key: number) => {
+        this.drawPass(item);
+      });
+      data.shipCellsDestroyed.forEach((item: {x: number, y: number}, key: number) => {
+        this.drawHit(item);
+      });
+    })
+  }
+
   private fireCoords(event: MouseEvent) {
     if (this.fieldtype == 'user') {
       let pageX = Math.floor((event.pageX - this.battleCoords.left) / 30);
       let pageY = Math.floor((event.pageY - this.battleCoords.top) / 30);
       this.apiService.shoot(this.gameId, this.userId, {x: pageX, y: pageY}).then((res) => {
         let response = JSON.parse(res['_body']);
-        if (response['result'] != 'wait') {
-          this.drawShoots(response);
+        if (response['result'] == 'wait') {
+          this.toastrService.info(response['message']);
+        } else if(response['result'] == 'end') {
+          this.drawHit(response['message']);
+          this.toastrService.info('You win!');
+          this.endGame();
         } else {
-          alert(response['message']);
+          this.drawShoots(response);
         }
       })
     }
   }
 
+  private endGame() {
+    this.apiService.setUserStatus(this.userId, 'free').then((res) => {});
+    localStorage.removeItem('gameId');
+    this.socket.emit('endGame', 'opponentId');
+  }
+
   private drawShoots(res: {}) {
     let coords = res['message'];
-    console.log(res['result']);
     if (res['result'] == 'pass') {
       this.drawPass(coords);
     } else {
@@ -70,14 +103,14 @@ export class BattleField implements OnChanges {
     }
   }
 
-  drawPass(coords: {x: number, y: number}): void {
+  private drawPass(coords: {x: number, y: number}): void {
     let ctx = this.battleField.getContext('2d');
     let startX: number = 43 + (coords.x * 30);
     let startY: number = 43 + (coords.y * 30);
     ctx.fillRect(startX, startY, 6, 6);
   }
 
-  drawHit(coords: {x: number, y: number}): void {
+  private drawHit(coords: {x: number, y: number}): void {
     let ctx = this.battleField.getContext('2d');
     ctx.lineWidth = .7;
     ctx.strokeStyle = "#ef2b2b";
@@ -100,7 +133,6 @@ export class BattleField implements OnChanges {
     this.battleField.height = 330;
     ctx.lineWidth = .3;
     ctx.strokeStyle = "#6f00ff";
-
     for (let i = 1; i <= 11; i++) {
       ctx.beginPath();
       ctx.moveTo(30 * i, 30);

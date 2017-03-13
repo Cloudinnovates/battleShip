@@ -170,7 +170,7 @@ export class GamePrepareComponent {
         shipsCoords = shipsCoords.concat(item.cells);
       });
       this.apiService.setFleet(this.gameId, this.userId, shipsCoords).then((res) => {
-        this.apiService.setUserStatus(this.userId, 'readyToPlay').then( (res) => {
+        this.apiService.setUserStatus(this.userId, 'readyToPlay').then((res) => {
           this.router.navigate(['game']);
         });
       });
