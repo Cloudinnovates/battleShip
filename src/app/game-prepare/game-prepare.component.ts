@@ -42,6 +42,8 @@ export class GamePrepareComponent {
     ]);
     this.createBattleField('userGamePanel');
     this.setBattleFieldCoords();
+    console.log('this.gameId, this.userId');
+    console.log(this.gameId, this.userId);
   }
 
   private addDragEvent(event: MouseEvent, shipObject: Ship): void {
@@ -169,7 +171,11 @@ export class GamePrepareComponent {
       this.fleet.ships.forEach(function(item) {
         shipsCoords = shipsCoords.concat(item.cells);
       });
+      console.log('shipsCoords');
+      console.log(shipsCoords);
       this.apiService.setFleet(this.gameId, this.userId, shipsCoords).then((res) => {
+        console.log('res');
+        console.log(res);
         this.apiService.setUserStatus(this.userId, 'readyToPlay').then((res) => {
           this.router.navigate(['game']);
         });

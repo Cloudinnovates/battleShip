@@ -1,5 +1,6 @@
 import {Component, ElementRef, Renderer, Input, Output, EventEmitter, OnChanges, SimpleChanges} from "@angular/core";
 import {ToastrService} from 'ngx-toastr';
+import {Router} from '@angular/router';
 import * as io from "socket.io-client";
 
 import {APIService} from '../API/api.service';
@@ -17,6 +18,7 @@ export class BattleField implements OnChanges {
   private renderer: Renderer;
   private battleField: any;
   private userId: string = localStorage.getItem('id');
+  private opponentId: string = localStorage.getItem('opponentId');
   private gameId: string = localStorage.getItem('gameId');
   private url: string = 'http://localhost:3000';
   private socket: any = null;
@@ -27,7 +29,7 @@ export class BattleField implements OnChanges {
   @Input()
   fieldtype: string;
 
-  constructor(componentElement: ElementRef, renderer: Renderer, private apiService: APIService, private toastrService: ToastrService) {
+  constructor(private router: Router, componentElement: ElementRef, renderer: Renderer, private apiService: APIService, private toastrService: ToastrService) {
     this.componentElement = componentElement;
     this.renderer = renderer;
   }
@@ -43,9 +45,21 @@ export class BattleField implements OnChanges {
     }
 
     this.socket = io.connect(this.url);
-    this.socket.on('gameLose', () => {
-      console.log('gameLose');
+    this.socket.on('connect', () => {
+      this.saveUsersSession();
     });
+    this.socket.on('gameLose', () => {
+      this.apiService.setUserStatus(this.userId, 'free').then((res) => {
+      });
+      this.toastrService.info('You lose!');
+      localStorage.removeItem('gameId');
+      localStorage.removeItem('opponentId');
+      this.router.navigate(['users']);
+    });
+  }
+
+  private saveUsersSession(): void {
+    this.apiService.saveUserSession({id: this.userId, sessionId: this.socket.id});
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -77,7 +91,7 @@ export class BattleField implements OnChanges {
         let response = JSON.parse(res['_body']);
         if (response['result'] == 'wait') {
           this.toastrService.info(response['message']);
-        } else if(response['result'] == 'end') {
+        } else if (response['result'] == 'end') {
           this.drawHit(response['message']);
           this.toastrService.info('You win!');
           this.endGame();
@@ -89,9 +103,14 @@ export class BattleField implements OnChanges {
   }
 
   private endGame() {
-    this.apiService.setUserStatus(this.userId, 'free').then((res) => {});
+    this.apiService.setUserStatus(this.userId, 'free').then((res) => {
+    });
     localStorage.removeItem('gameId');
-    this.socket.emit('endGame', 'opponentId');
+    localStorage.removeItem('opponentId');
+    this.apiService.getUserSession(this.opponentId).then((res: any) => {
+      this.socket.emit('endGame', {id: res._body});
+    });
+    this.router.navigate(['users']);
   }
 
   private drawShoots(res: {}) {

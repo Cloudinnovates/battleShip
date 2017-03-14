@@ -16,7 +16,6 @@ export class UserNotificationComponent {
   constructor() {}
 
   createAnswer(answer: boolean) {
-    console.log(this.notificationdata);
     this.answerready.emit({answer: answer, users : this.notificationdata});
   }
 }

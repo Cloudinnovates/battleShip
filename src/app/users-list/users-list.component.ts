@@ -82,8 +82,8 @@ export class UsersListComponent {
         this.getUserSession(id, (res: string) => {
           this.createNewGame(id, this.userId, (newGameId: string) => {
             localStorage.setItem('gameId', newGameId);
-            this.router.navigate(['game-prepare']);
             this.socket.emit('positiveAnswer', {id: res['_body'], userName: userName, newGameId: newGameId, userId : localStorage.getItem('id')});
+            this.router.navigate(['game-prepare']);
           });
         })
       } else {
