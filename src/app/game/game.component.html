@@ -1,10 +1,21 @@
+<p>
+  <span *ngIf="!isOpponentReady">{{opponentName}} is preparing for battle</span>
+  <span *ngIf="isOpponentReady">
+    <span *ngIf="canFire">
+      Your shot
+    </span>
+    <span *ngIf="!canFire">
+      {{opponentName}}'s shot
+    </span>
+  </span>
+</p>
 <div class="game">
   <div class="game-col">
-    <h2>You</h2>
-    <battle-field [coordsdata]="shipsCoords" [fieldtype]="'opponent'"></battle-field>
+    <h2 class="game-col-title">You</h2>
+    <battle-field [coordsdata]="userCoords"></battle-field>
   </div>
   <div class="game-col">
-    <h2>{{opponentName}}</h2>
-    <battle-field [fieldtype]="'user'"></battle-field>
+    <h2 class="game-col-title">{{opponentName}}</h2>
+    <battle-field [coordsdata]="opponentCoords" [firePanel]="true" (onShoot)="checkShoot($event)"></battle-field>
   </div>
 </div>

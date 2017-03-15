@@ -1,9 +1,17 @@
-import {Component, ElementRef, Renderer, Input, OnChanges, SimpleChanges} from "@angular/core";
-import {ToastrService} from 'ngx-toastr';
-import {Router} from '@angular/router';
-import * as io from "socket.io-client";
+import {
+  Component,
+  ElementRef,
+  Renderer,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+  AfterViewInit,
+  EventEmitter,
+  DoCheck
+} from "@angular/core";
 
-import {APIService} from '../API/api.service';
+import {FieldCoords} from '../FieldCoords';
 
 @Component({
   moduleId: module.id,
@@ -12,24 +20,21 @@ import {APIService} from '../API/api.service';
   styleUrls: ['./battle-field.component.css']
 })
 
-export class BattleField implements OnChanges {
-  private battleCoords: {top: number, left: number};
+export class BattleField implements DoCheck, AfterViewInit {
   private componentElement: ElementRef;
   private renderer: Renderer;
-  private battleField: any;
-  private userId: string = localStorage.getItem('id');
-  private opponentId: string = localStorage.getItem('opponentId');
-  private gameId: string = localStorage.getItem('gameId');
-  private url: string = 'http://localhost:3000';
-  private socket: any = null;
+  private battleField: any = null;
+  private battleCoordsCanvas: any = null;
+  private battleCoords: {top: number, left: number};
+  private data: FieldCoords;
+  private oldData: FieldCoords = this.data;
 
-  @Input()
-  coordsdata: Array<{x: number, y: number}>;
+  @Input() coordsdata: FieldCoords;
+  @Input() firePanel: boolean;
 
-  @Input()
-  fieldtype: string;
+  @Output() onShoot = new EventEmitter<{}>();
 
-  constructor(private router: Router, componentElement: ElementRef, renderer: Renderer, private apiService: APIService, private toastrService: ToastrService) {
+  constructor(componentElement: ElementRef, renderer: Renderer) {
     this.componentElement = componentElement;
     this.renderer = renderer;
   }
@@ -39,119 +44,68 @@ export class BattleField implements OnChanges {
     this.renderer.listen(this.battleField, 'click', (event: MouseEvent) => {
       this.fireCoords(event);
     });
-    this.socket = io.connect(this.url);
-    this.socket.on('connect', () => {
-      this.saveUsersSession();
-    });
-    if (this.fieldtype == 'user') {
-      this.battleProgressLoad();
-    }
-    this.socket.on('gameLose', () => {
-      this.apiService.setUserStatus(this.userId, 'free').then((res) => {
-      });
-      this.toastrService.info('You lose!');
-      localStorage.removeItem('gameId');
-      localStorage.removeItem('opponentId');
-      localStorage.removeItem('opponentName');
-      this.router.navigate(['users']);
-    });
-    this.socket.on('opponentShoot', (data: any) => {
-      console.log(this);
-      this.opponentShootDraw(data.shootInfo);
-    });
+    this.data = this.coordsdata;
   }
 
   ngAfterViewInit() {
     this.setBattleFieldCoords();
   }
 
-  private opponentShootDraw(data: any) {
-    if (this.fieldtype == 'opponent') {
-      console.log('drawShoot');
-      this.drawShoots(data);
-    }
-  }
-
-  private saveUsersSession(): void {
-    this.apiService.saveUserSession({id: this.userId, sessionId: this.socket.id});
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (this.coordsdata) {
-      let newCoords = changes['coordsdata'].currentValue;
-      if (newCoords && newCoords.length > 0) {
-        this.drawShips(newCoords);
+  ngDoCheck() {
+    this.oldData = this.data;
+    this.data = this.coordsdata;
+    if (this.oldData === this.data) {
+      if (this.battleField) {
+        this.drawBattle();
       }
     }
   }
 
-  private battleProgressLoad() {
-    this.apiService.getBattleProgress(this.gameId, this.userId).then((res: any) => {
-      let data = JSON.parse(res['_body']).user;
-      data.pureShots.forEach((item: {x: number, y: number}, key: number) => {
+  private drawBattle() {
+    let ctx = this.battleCoordsCanvas.getContext('2d');
+    ctx.clearRect(0, 0, this.battleCoordsCanvas.width, this.battleCoordsCanvas.height);
+    if (this.data.shipCoords && this.data.shipCoords.length > 0) {
+      this.drawShips(this.data.shipCoords);
+    }
+    if (this.data.passCoords && this.data.passCoords.length > 0) {
+      this.data.passCoords.forEach((item: any) => {
         this.drawPass(item);
       });
-      data.shipCellsDestroyed.forEach((item: {x: number, y: number}, key: number) => {
+    }
+    if (this.data.hitCoords && this.data.hitCoords.length > 0) {
+      this.data.hitCoords.forEach((item: any) => {
         this.drawHit(item);
       });
-    })
+    }
   }
 
   private fireCoords(event: MouseEvent) {
-    if (this.fieldtype == 'user') {
+    if (this.firePanel) {
       let pageX = Math.floor((event.pageX - this.battleCoords.left) / 30);
       let pageY = Math.floor((event.pageY - this.battleCoords.top) / 30);
-      this.apiService.shoot(this.gameId, this.userId, {x: pageX, y: pageY}).then((res) => {
-        let response = JSON.parse(res['_body']);
-        if (response['result'] == 'wait') {
-          this.toastrService.info(response['message']);
-        } else if (response['result'] == 'end') {
-          this.drawHit(response['message']);
-          this.toastrService.info('You win!');
-          this.endGame();
-        } else {
-          this.drawShoots(response);
-          this.apiService.getUserSession(this.opponentId).then((res: any) => {
-            this.socket.emit('opponentShootAction', {id: res._body, shootInfo: response});
-          });
-        }
-      })
+      this.onShoot.emit({x: pageX, y: pageY});
     }
   }
 
-  private endGame() {
-    this.apiService.setUserStatus(this.userId, 'free').then((res) => {
-    });
-    localStorage.removeItem('gameId');
-    localStorage.removeItem('opponentId');
-    localStorage.removeItem('opponentName');
-    this.apiService.getUserSession(this.opponentId).then((res: any) => {
-      this.socket.emit('endGame', {id: res._body});
-    });
-    this.router.navigate(['users']);
-  }
-
-  private drawShoots(res: {}) {
-    let coords = res['message'];
-    console.log(coords);
-    console.log(res['result']);
-    if (res['result'] == 'pass') {
-      this.drawPass(coords);
-    } else {
-      this.drawHit(coords);
-    }
-  }
+  // private drawShoots(res: {}) {
+  //   let coords = res['message'];
+  //   if (res['result'] == 'pass') {
+  //     this.drawPass(coords);
+  //   } else {
+  //     this.drawHit(coords);
+  //   }
+  // }
 
   private drawPass(coords: {x: number, y: number}): void {
-    let ctx = this.battleField.getContext('2d');
+    let ctx = this.battleCoordsCanvas.getContext('2d');
     let startX: number = 43 + (coords.x * 30);
     let startY: number = 43 + (coords.y * 30);
     ctx.fillRect(startX, startY, 6, 6);
   }
 
   private drawHit(coords: {x: number, y: number}): void {
-    let ctx = this.battleField.getContext('2d');
-    ctx.lineWidth = .7;
+    let ctx = this.battleCoordsCanvas.getContext('2d');
+    ctx.lineWidth = 1;
     ctx.strokeStyle = "#ef2b2b";
     let startX: number = 30 + (coords.x * 30);
     let startY: number = 30 + (coords.y * 30);
@@ -167,9 +121,13 @@ export class BattleField implements OnChanges {
 
   private createBattleField() {
     this.battleField = document.createElement('canvas');
+    this.battleCoordsCanvas = document.createElement('canvas');
+    this.battleCoordsCanvas.classList.add('coords-canvas');
     let ctx = this.battleField.getContext('2d');
     this.battleField.width = 330;
+    this.battleCoordsCanvas.width = 330;
     this.battleField.height = 330;
+    this.battleCoordsCanvas.height = 330;
     ctx.lineWidth = .3;
     ctx.strokeStyle = "#6f00ff";
     for (let i = 1; i <= 11; i++) {
@@ -182,11 +140,12 @@ export class BattleField implements OnChanges {
       ctx.lineTo(330, 30 * i);
       ctx.stroke();
     }
-    this.componentElement.nativeElement.appendChild(this.battleField);
+    this.componentElement.nativeElement.querySelector('.game-field').appendChild(this.battleField);
+    this.componentElement.nativeElement.querySelector('.game-field').appendChild(this.battleCoordsCanvas);
   }
 
   private drawShips(coords: Array<{x: number, y: number}>) {
-    let ctx = this.battleField.getContext('2d');
+    let ctx = this.battleCoordsCanvas.getContext('2d');
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#6f00ff";
     coords.forEach(function (item, key) {

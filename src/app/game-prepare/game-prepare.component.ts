@@ -14,7 +14,7 @@ import {ShipCell} from '../ship/shipCell';
   styleUrls: ['./game-prepare.component.css']
 })
 
-export class GamePrepareComponent {
+export class GamePrepareComponent implements OnInit{
   private battleCoords: {top: number, left: number};
   private battleWidth: number = 300;
   private battleHeight: number = 300;
@@ -169,12 +169,8 @@ export class GamePrepareComponent {
       this.fleet.ships.forEach(function(item) {
         shipsCoords = shipsCoords.concat(item.cells);
       });
-      console.log('shipsCoords');
-      console.log(shipsCoords);
       this.apiService.setFleet(this.gameId, this.userId, shipsCoords).then((res) => {
-        console.log('res');
-        console.log(res);
-        this.apiService.setUserStatus(this.userId, 'readyToPlay').then((res) => {
+        this.apiService.setUserStatus(this.userId, 'ready').then((res) => {
           this.router.navigate(['game']);
         });
       });

@@ -30,3 +30,10 @@
 .game-field {
   position: relative;
 }
+
+:host /deep/ .coords-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}

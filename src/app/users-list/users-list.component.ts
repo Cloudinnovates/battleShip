@@ -40,7 +40,7 @@ export class UsersListComponent {
       this.toastrService.info(`${data} rejected your request!`);
     });
     this.socket.on('playRequestAccepted', (data: {}) => {
-      this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
+      this.apiService.setUserStatus(this.userId, 'prepare').then((res) => {
         localStorage.setItem('gameId', data['newGameId']);
         localStorage.setItem('opponentId', data['opponentId']);
         localStorage.setItem('opponentName', data['opponentName']);
@@ -79,7 +79,7 @@ export class UsersListComponent {
   private setPositiveAnswer(id: string, userName: string) {
     this.apiService.getUserStatus(id).then((res) => {
       if (res['_body'] == 'free') {
-        this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
+        this.apiService.setUserStatus(this.userId, 'prepare').then((res) => {
         });
         this.getUserSession(id, (res: string) => {
           this.createNewGame(id, this.userId, (newGameId: string) => {
@@ -90,8 +90,7 @@ export class UsersListComponent {
         })
       } else {
         this.toastrService.info('The user is playing already!');
-        this.apiService.setUserStatus(this.userId, 'free').then((res) => {
-        });
+        this.apiService.setUserStatus(this.userId, 'free').then((res) => {});
       }
     });
   }
