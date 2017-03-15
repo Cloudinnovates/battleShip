@@ -53,3 +53,8 @@
 .game-field {
   position: relative;
 }
+
+.game-col-title {
+  margin: 0;
+  padding: 30px;
+}

@@ -1,4 +1,4 @@
-import {Component, ElementRef, Renderer, Input, Output, EventEmitter, OnChanges, SimpleChanges} from "@angular/core";
+import {Component, ElementRef, Renderer, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {ToastrService} from 'ngx-toastr';
 import {Router} from '@angular/router';
 import * as io from "socket.io-client";
@@ -36,26 +36,40 @@ export class BattleField implements OnChanges {
 
   ngOnInit() {
     this.createBattleField();
-    this.setBattleFieldCoords();
     this.renderer.listen(this.battleField, 'click', (event: MouseEvent) => {
       this.fireCoords(event);
     });
-    if (this.fieldtype == 'user') {
-      this.battleProgressLoad();
-    }
-
     this.socket = io.connect(this.url);
     this.socket.on('connect', () => {
       this.saveUsersSession();
     });
+    if (this.fieldtype == 'user') {
+      this.battleProgressLoad();
+    }
     this.socket.on('gameLose', () => {
       this.apiService.setUserStatus(this.userId, 'free').then((res) => {
       });
       this.toastrService.info('You lose!');
       localStorage.removeItem('gameId');
       localStorage.removeItem('opponentId');
+      localStorage.removeItem('opponentName');
       this.router.navigate(['users']);
     });
+    this.socket.on('opponentShoot', (data: any) => {
+      console.log(this);
+      this.opponentShootDraw(data.shootInfo);
+    });
+  }
+
+  ngAfterViewInit() {
+    this.setBattleFieldCoords();
+  }
+
+  private opponentShootDraw(data: any) {
+    if (this.fieldtype == 'opponent') {
+      console.log('drawShoot');
+      this.drawShoots(data);
+    }
   }
 
   private saveUsersSession(): void {
@@ -97,6 +111,9 @@ export class BattleField implements OnChanges {
           this.endGame();
         } else {
           this.drawShoots(response);
+          this.apiService.getUserSession(this.opponentId).then((res: any) => {
+            this.socket.emit('opponentShootAction', {id: res._body, shootInfo: response});
+          });
         }
       })
     }
@@ -107,6 +124,7 @@ export class BattleField implements OnChanges {
     });
     localStorage.removeItem('gameId');
     localStorage.removeItem('opponentId');
+    localStorage.removeItem('opponentName');
     this.apiService.getUserSession(this.opponentId).then((res: any) => {
       this.socket.emit('endGame', {id: res._body});
     });
@@ -115,6 +133,8 @@ export class BattleField implements OnChanges {
 
   private drawShoots(res: {}) {
     let coords = res['message'];
+    console.log(coords);
+    console.log(res['result']);
     if (res['result'] == 'pass') {
       this.drawPass(coords);
     } else {

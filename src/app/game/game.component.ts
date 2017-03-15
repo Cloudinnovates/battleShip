@@ -14,7 +14,9 @@ import {Router} from '@angular/router';
 export class GameComponent {
   private userId: string = localStorage.getItem('id');
   private gameId: string = localStorage.getItem('gameId');
+  private userName: string = localStorage.getItem('userName');
   private shipsCoords: Array<{x: number, y: number}>;
+  private opponentName: string = localStorage.getItem('opponentName');
 
   constructor(private apiService: APIService, private router : Router, private toastrService: ToastrService) {}
 
@@ -27,5 +29,4 @@ export class GameComponent {
       this.shipsCoords = JSON.parse(res['_body']).shipsCellsCoords;
     })
   }
-
 }

@@ -1,8 +1,10 @@
 <div class="game">
   <div class="game-col">
-    <battle-field [coordsdata]="shipsCoords"></battle-field>
+    <h2>You</h2>
+    <battle-field [coordsdata]="shipsCoords" [fieldtype]="'opponent'"></battle-field>
   </div>
   <div class="game-col">
+    <h2>{{opponentName}}</h2>
     <battle-field [fieldtype]="'user'"></battle-field>
   </div>
 </div>

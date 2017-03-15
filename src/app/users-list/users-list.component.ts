@@ -43,6 +43,7 @@ export class UsersListComponent {
       this.apiService.setUserStatus(this.userId, 'playing').then((res) => {
         localStorage.setItem('gameId', data['newGameId']);
         localStorage.setItem('opponentId', data['opponentId']);
+        localStorage.setItem('opponentName', data['opponentName']);
         this.router.navigate(['game-prepare']);
       });
     });
@@ -68,6 +69,7 @@ export class UsersListComponent {
     if (data['answer']) {
       this.setPositiveAnswer(data['users'].senderId, this.userName);
       localStorage.setItem('opponentId', data['users'].senderId);
+      localStorage.setItem('opponentName', data['users'].senderName);
     } else {
       this.setNegativeAnswer(data['users'].senderId, this.userName);
     }

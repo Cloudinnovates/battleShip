@@ -42,8 +42,6 @@ export class GamePrepareComponent {
     ]);
     this.createBattleField('userGamePanel');
     this.setBattleFieldCoords();
-    console.log('this.gameId, this.userId');
-    console.log(this.gameId, this.userId);
   }
 
   private addDragEvent(event: MouseEvent, shipObject: Ship): void {

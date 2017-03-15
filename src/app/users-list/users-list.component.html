@@ -3,8 +3,7 @@
     <p class="users-title">Choose opponent</p>
     <div class="users-item" *ngFor="let user of users" (click)="this.chooseOpponent(user._id)" [hidden]="userId == user._id">
       <span class="users-name">
-        {{user.username}}<br>
-        {{user._id}}
+        {{user.username}}
       </span>
     </div>
   </div>
