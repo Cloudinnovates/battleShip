@@ -87,15 +87,6 @@ export class BattleField implements DoCheck, AfterViewInit {
     }
   }
 
-  // private drawShoots(res: {}) {
-  //   let coords = res['message'];
-  //   if (res['result'] == 'pass') {
-  //     this.drawPass(coords);
-  //   } else {
-  //     this.drawHit(coords);
-  //   }
-  // }
-
   private drawPass(coords: {x: number, y: number}): void {
     let ctx = this.battleCoordsCanvas.getContext('2d');
     let startX: number = 43 + (coords.x * 30);

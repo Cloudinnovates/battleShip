@@ -32,6 +32,8 @@ export class GameComponent {
   }
 
   ngOnInit(): void {
+    this.checkOpponentStatus();
+    this.setPlayingStatus();
     this.socket = io.connect(this.url);
     this.socket.on('connect', () => {
       this.saveUsersSession();
@@ -49,6 +51,7 @@ export class GameComponent {
       this.battleProgressLoad();
     });
     this.socket.on('opponentReady', () => {
+      console.log('opponent ready');
       this.setOpponentReady();
     });
   }
@@ -103,7 +106,7 @@ export class GameComponent {
         });
         this.battleProgressLoad();
       }
-    })
+    });
   }
 
   private endGame() {
@@ -124,9 +127,15 @@ export class GameComponent {
     });
   }
 
+  private checkOpponentStatus() {
+    this.apiService.getUserStatus(this.opponentId).then((res: any) => {
+      if(res._body === 'ready') {
+        this.isOpponentReady = true;
+      }
+    })
+  }
+
   private setOpponentReady() {
     this.isOpponentReady = true;
   }
-
-  private setOfflineStatus() {}
 }
