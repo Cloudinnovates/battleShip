@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent}     from './app.component';
-
+import {CanActivateRoutes} from './routeAccess/CanActivateRoutes';
 import {APIService}                 from './API/api.service';
 import {LoginPageComponent}         from './login/login.component';
 import {UsersListComponent}         from './users-list/users-list.component';
@@ -37,7 +37,8 @@ import {UserNotificationComponent}  from './user-notification/userNotification.c
     UserNotificationComponent
   ],
   providers: [
-    APIService
+    APIService,
+    CanActivateRoutes
   ],
   bootstrap: [AppComponent]
 })

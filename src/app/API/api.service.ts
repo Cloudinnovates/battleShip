@@ -1,10 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Http, Headers} from '@angular/http';
 import 'rxjs/add/operator/toPromise';
-
 import {Fleet} from '../fleet/fleet';
 import {ShipCell} from '../ship/shipCell';
-import {User} from  '../user';
+import {User} from  '../models/user';
 
 @Injectable()
 export class APIService {

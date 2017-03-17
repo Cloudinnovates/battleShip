@@ -1,7 +1,8 @@
 import {Component} from '@angular/core';
-import {APIService} from '../API/api.service';
 import {Router} from '@angular/router';
 import 'rxjs/add/operator/toPromise';
+
+import {APIService} from '../API/api.service';
 
 @Component({
   moduleId: module.id,
@@ -14,9 +15,7 @@ export class LoginPageComponent {
   private username: string;
 
   constructor(private apiService: APIService, private router: Router) {
-    if(localStorage.getItem('userName') && localStorage.getItem('id')) {
-      this.router.navigate(['users']);
-    }
+
   }
 
   createUser() {
@@ -24,6 +23,7 @@ export class LoginPageComponent {
       let user = JSON.parse(response['_body']);
       localStorage.setItem('userName', user.username);
       localStorage.setItem('id', user._id);
+      localStorage.setItem('status', 'free');
       this.router.navigate(['users']);
     });
   }

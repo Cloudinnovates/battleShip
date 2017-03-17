@@ -4,14 +4,12 @@ import {
   Renderer,
   Input,
   Output,
-  OnChanges,
-  SimpleChanges,
   AfterViewInit,
   EventEmitter,
   DoCheck
 } from "@angular/core";
 
-import {FieldCoords} from '../FieldCoords';
+import {FieldCoords} from '../models/FieldCoords';
 
 @Component({
   moduleId: module.id,

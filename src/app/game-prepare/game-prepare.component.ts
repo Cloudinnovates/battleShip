@@ -1,8 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-
-import {APIService} from '../API/api.service';
 import {Router} from '@angular/router';
 
+import {APIService} from '../API/api.service';
 import {Fleet} from '../fleet/fleet';
 import {Ship} from '../ship/ship';
 import {ShipCell} from '../ship/shipCell';
@@ -25,7 +24,9 @@ export class GamePrepareComponent implements OnInit{
   private shipType: {width: number, height: number} = {width: null, height: null};
   fleet: Fleet;
 
-  constructor(private apiService: APIService, private router : Router) {}
+  constructor(private apiService: APIService, private router : Router) {
+
+  }
 
   ngOnInit(): void {
     this.fleet = new Fleet([
@@ -171,6 +172,7 @@ export class GamePrepareComponent implements OnInit{
       });
       this.apiService.setFleet(this.gameId, this.userId, shipsCoords).then((res) => {
         this.apiService.setUserStatus(this.userId, 'ready').then((res) => {
+          localStorage.setItem('status', 'ready');
           this.router.navigate(['game']);
         });
       });

@@ -1,9 +1,10 @@
-import {Component, DoCheck} from '@angular/core';
+import {Component} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
-import {FieldCoords} from '../FieldCoords';
 import {Router} from '@angular/router';
 import * as io from "socket.io-client";
+
 import {APIService} from '../API/api.service';
+import {FieldCoords} from '../models/FieldCoords';
 
 @Component({
   moduleId: module.id,
@@ -39,19 +40,13 @@ export class GameComponent {
       this.saveUsersSession();
     });
     this.socket.on('gameLose', () => {
-      this.apiService.setUserStatus(this.userId, 'free').then((res) => {
-      });
       this.toastrService.info('You lose!');
-      localStorage.removeItem('gameId');
-      localStorage.removeItem('opponentId');
-      localStorage.removeItem('opponentName');
-      this.router.navigate(['users']);
+      this.onGameEnd();
     });
     this.socket.on('opponentShoot', () => {
       this.battleProgressLoad();
     });
     this.socket.on('opponentReady', () => {
-      console.log('opponent ready');
       this.setOpponentReady();
     });
   }
@@ -92,33 +87,33 @@ export class GameComponent {
   }
 
   private checkShoot(coords: {x: number, y: number}) {
-    this.apiService.shoot(this.gameId, this.userId, coords).then((res) => {
-      let response = JSON.parse(res['_body']);
-      if (response['result'] == 'wait') {
-        this.toastrService.info(response['message']);
-      } else if (response['result'] == 'end') {
-        this.battleProgressLoad();
-        this.toastrService.info('You win!');
-        this.endGame();
-      } else {
-        this.apiService.getUserSession(this.opponentId).then((res: any) => {
-          this.socket.emit('opponentShootAction', {id: res._body});
-        });
-        this.battleProgressLoad();
-      }
-    });
+    if(this.isOpponentReady) {
+      this.apiService.shoot(this.gameId, this.userId, coords).then((res) => {
+        let response = JSON.parse(res['_body']);
+        if (response['result'] == 'wait') {
+          this.toastrService.info(response['message']);
+        } else if (response['result'] == 'end') {
+          this.battleProgressLoad();
+          this.toastrService.info('You win!');
+          this.endGame();
+        } else {
+          this.apiService.getUserSession(this.opponentId).then((res: any) => {
+            this.socket.emit('opponentShootAction', {id: res._body});
+          });
+          this.battleProgressLoad();
+        }
+      });
+    } else {
+      this.toastrService.info(this.opponentName + ' is preparing for battle.');
+    }
+
   }
 
   private endGame() {
-    this.apiService.setUserStatus(this.userId, 'free').then((res) => {
-    });
-    localStorage.removeItem('gameId');
-    localStorage.removeItem('opponentId');
-    localStorage.removeItem('opponentName');
     this.apiService.getUserSession(this.opponentId).then((res: any) => {
       this.socket.emit('endGame', {id: res._body});
     });
-    this.router.navigate(['users']);
+    this.onGameEnd();
   }
 
   private setPlayingStatus() {
@@ -137,5 +132,16 @@ export class GameComponent {
 
   private setOpponentReady() {
     this.isOpponentReady = true;
+  }
+
+  private onGameEnd() {
+    this.apiService.setUserStatus(this.userId, 'free').then((res) => {
+      localStorage.setItem('status', 'free');
+      localStorage.removeItem('gameId');
+      localStorage.removeItem('opponentId');
+      localStorage.removeItem('opponentName');
+      this.router.navigate(['users']);
+    });
+
   }
 }

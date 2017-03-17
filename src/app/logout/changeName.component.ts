@@ -23,6 +23,10 @@ export class ChangeNameComponent {
       if (response.status == 200) {
         localStorage.removeItem('userName');
         localStorage.removeItem('id');
+        localStorage.removeItem('status');
+        localStorage.removeItem('gameId');
+        localStorage.removeItem('opponentId');
+        localStorage.removeItem('opponentName');
         this.router.navigate(['login']);
       }
     });

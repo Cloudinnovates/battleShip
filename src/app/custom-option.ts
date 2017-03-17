@@ -1,5 +1,5 @@
 export class CustomOption {
-  animate = 'flyRight'; // you can pass any options to override defaults
+  animate = 'flyRight';
   newestOnTop = false;
   showCloseButton = true;
   dismiss = 'auto';
