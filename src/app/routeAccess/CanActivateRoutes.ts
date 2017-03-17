@@ -9,7 +9,7 @@ export class CanActivateRoutes implements CanActivate {
   canActivate(ActivatedRouteSnapshot: any, RouterStateSnapshot: any) {
     let url = RouterStateSnapshot.url;
     let status = localStorage.getItem('status');
-    if((localStorage.getItem('id') && localStorage.getItem('userName'))) {
+    if(status) {
       if(status == 'free' && url != '/users') {
         this.router.navigate(['users']);
         return false;
@@ -23,8 +23,13 @@ export class CanActivateRoutes implements CanActivate {
         return true;
       }
     } else {
-      this.router.navigate(['login']);
-      return false;
+      if(url != '/login') {
+        this.router.navigate(['login']);
+        return false;
+      } else {
+        return true;
+      }
     }
   }
+
 }
